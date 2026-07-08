@@ -519,6 +519,41 @@
                 font-size: 0.85em;
                 margin-top: 0.5em;
             }
+
+            @media (max-width: 640px) {
+                .header {
+                    flex-direction: column;
+                    padding: 12px;
+                    position: relative;
+                }
+                .header-top {
+                    width: 100%;
+                    margin-bottom: 22px;
+                }
+                .header-nav {
+                    flex-direction: column;
+                }
+                .header-nav > * {
+                    width: 100%;
+                    justify-content: flex-start;
+                }
+                .header-nav > *:nth-child(3n + 1),
+                .header-nav > *:nth-child(3n + 2),
+                .header-nav > *:nth-child(3n + 3) {
+                    top: 0;
+                }
+                .page {
+                    position: relative;
+                    top: 0;
+                    padding-top: 22px;
+                }
+                .container {
+                    max-width: 100%;
+                }
+                .code-block {
+                    overflow-x: auto;
+                }
+            }
         </style>
     </head>
     <body>
