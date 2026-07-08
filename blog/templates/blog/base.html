@@ -270,10 +270,14 @@
             .code-block {
                 position: relative;
             }
-            .run-btn {
+            .code-toolbar {
                 position: absolute;
                 top: 0;
                 right: 0;
+                display: flex;
+                z-index: 1;
+            }
+            .code-toolbar button {
                 padding: 2px 8px;
                 font-size: 0.75em;
                 font-family:
@@ -282,11 +286,18 @@
                 background: var(--btn-bg);
                 color: var(--text-muted);
                 border: 1px solid var(--btn-border);
+                border-left: none;
                 cursor: pointer;
-                z-index: 1;
             }
-            .run-btn:hover {
+            .code-toolbar button:first-child {
+                border-left: 1px solid var(--btn-border);
+            }
+            .code-toolbar button:hover {
                 background: var(--btn-hover);
+            }
+            .code-block.editing .highlight pre {
+                outline: 2px solid var(--btn-border);
+                outline-offset: -2px;
             }
             .run-output {
                 background: var(--pre-bg);
@@ -622,16 +633,39 @@
                     block.parentNode.insertBefore(wrapper, block);
                     wrapper.appendChild(block);
 
-                    var btn = document.createElement("button");
-                    btn.className = "run-btn";
-                    btn.textContent = "Run";
-                    wrapper.appendChild(btn);
+                    var codeEl = block.querySelector("code");
+
+                    var toolbar = document.createElement("div");
+                    toolbar.className = "code-toolbar";
+
+                    var editBtn = document.createElement("button");
+                    editBtn.textContent = "Edit";
+                    toolbar.appendChild(editBtn);
+
+                    var runBtn = document.createElement("button");
+                    runBtn.textContent = "Run";
+                    toolbar.appendChild(runBtn);
+
+                    wrapper.appendChild(toolbar);
 
                     var output = document.createElement("pre");
                     output.className = "run-output";
                     wrapper.appendChild(output);
 
-                    btn.addEventListener("click", function () {
+                    editBtn.addEventListener("click", function () {
+                        if (wrapper.classList.contains("editing")) {
+                            wrapper.classList.remove("editing");
+                            editBtn.textContent = "Edit";
+                            codeEl.contentEditable = "false";
+                        } else {
+                            wrapper.classList.add("editing");
+                            editBtn.textContent = "Done";
+                            codeEl.contentEditable = "true";
+                            codeEl.focus();
+                        }
+                    });
+
+                    runBtn.addEventListener("click", function () {
                         var code = block.textContent || "";
                         output.className = "run-output";
                         output.textContent = "Running...";
