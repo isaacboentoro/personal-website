@@ -520,6 +520,36 @@
                 margin-top: 0.5em;
             }
 
+            /* Tablet: keep header fixed but adjust spacing */
+            @media (max-width: 1024px) {
+                .header {
+                    padding: 12px 12px;
+                }
+                .header-top {
+                    width: 200px;
+                }
+                .header-nav > * {
+                    width: 12%;
+                }
+                .header-nav > *:nth-child(3n + 2) {
+                    top: 16px;
+                }
+                .header-nav > *:nth-child(3n + 3) {
+                    top: 32px;
+                }
+                .page {
+                    top: 80px;
+                }
+                .container {
+                    max-width: 560px;
+                    padding: 0 16px;
+                }
+                .site-title {
+                    font-size: 1.6em;
+                }
+            }
+
+            /* Phone: stack header vertically, make page static */
             @media (max-width: 640px) {
                 .header {
                     flex-direction: column;
@@ -528,7 +558,7 @@
                 }
                 .header-top {
                     width: 100%;
-                    margin-bottom: 22px;
+                    margin-bottom: 12px;
                 }
                 .header-nav {
                     flex-direction: column;
@@ -545,13 +575,26 @@
                 .page {
                     position: relative;
                     top: 0;
-                    padding-top: 22px;
+                    padding-top: 12px;
                 }
                 .container {
                     max-width: 100%;
                 }
                 .code-block {
                     overflow-x: auto;
+                }
+                body {
+                    font-size: 16px;
+                    line-height: 21px;
+                }
+                .label {
+                    margin-bottom: 6px;
+                }
+                .label-group {
+                    margin-top: 22px;
+                }
+                .label-group .label + .label {
+                    margin-top: 6px;
                 }
             }
         </style>

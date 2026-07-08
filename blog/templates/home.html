@@ -108,18 +108,44 @@
                 border-bottom-width: 2px;
             }
 
-            @media (max-width: 640px) {
+            @media (max-width: 1024px) {
                 .parallax-stage {
                     max-width: 100vw;
+                    aspect-ratio: 1280 / 853;
                 }
                 .overlay {
-                    top: 60px;
+                    top: 40px;
                 }
                 .title {
-                    font-size: 1.5em;
+                    font-size: 1.6em;
                 }
                 .subtitle {
                     font-size: 15px;
+                }
+                .container {
+                    padding: 0 16px;
+                }
+            }
+
+            @media (max-width: 640px) {
+                .parallax-stage {
+                    max-width: 100vw;
+                    aspect-ratio: 4 / 3;
+                }
+                .overlay {
+                    top: 24px;
+                }
+                .title {
+                    font-size: 1.35em;
+                }
+                .subtitle {
+                    font-size: 14px;
+                }
+                .label {
+                    margin-bottom: 6px;
+                }
+                .label-group {
+                    margin-top: 22px;
                 }
             }
         </style>
@@ -357,22 +383,50 @@
 
             var layers = Array.from(stage.querySelectorAll(".layer"));
             var state = layers.map(function () {
-                return { target: 0, current: 0 };
+                return { x: 0, y: 0 };
             });
-            var targetNorm = 0;
 
-            function setTarget(y) {
-                targetNorm = (y / window.innerHeight) * 2 - 1;
+            // Delta-based dragging: accumulate movement, decay toward zero
+            var dragX = 0;
+            var dragY = 0;
+            var lastMX = 0;
+            var lastMY = 0;
+            var lastTX = 0;
+            var lastTY = 0;
+            var hasTouch = false;
+
+            function addDelta(dx, dy) {
+                dragX += dx * 0.15;
+                dragY += dy * 0.15;
+                dragX = Math.max(-1, Math.min(1, dragX));
+                dragY = Math.max(-1, Math.min(1, dragY));
             }
 
             window.addEventListener("mousemove", function (e) {
-                setTarget(e.clientY);
+                // Use movementX/Y when available, otherwise compute delta
+                if (e.movementX !== undefined) {
+                    addDelta(e.movementX, e.movementY);
+                } else {
+                    if (lastMX || lastMY) {
+                        addDelta(e.clientX - lastMX, e.clientY - lastMY);
+                    }
+                    lastMX = e.clientX;
+                    lastMY = e.clientY;
+                }
+                hasTouch = false;
             });
 
             window.addEventListener(
                 "touchmove",
                 function (e) {
-                    setTarget(e.touches[0].clientY);
+                    var tx = e.touches[0].clientX;
+                    var ty = e.touches[0].clientY;
+                    if (lastTX || lastTY) {
+                        addDelta(tx - lastTX, ty - lastTY);
+                    }
+                    lastTX = tx;
+                    lastTY = ty;
+                    hasTouch = true;
                 },
                 { passive: true },
             );
@@ -380,23 +434,49 @@
             window.addEventListener(
                 "touchstart",
                 function (e) {
-                    setTarget(e.touches[0].clientY);
+                    lastTX = e.touches[0].clientX;
+                    lastTY = e.touches[0].clientY;
+                    hasTouch = true;
                 },
                 { passive: true },
             );
 
-            var STRENGTH = 40;
-            var EASE = 0.08;
+            window.addEventListener("touchend", function () {
+                lastTX = 0;
+                lastTY = 0;
+            });
+
+            window.addEventListener("mouseleave", function () {
+                lastMX = 0;
+                lastMY = 0;
+            });
+
+            var STRENGTH = 50;
+            var DECAY = 0.02;
 
             function tick() {
+                // Decay drag toward zero when idle
+                dragX *= 1 - DECAY;
+                dragY *= 1 - DECAY;
+
+                // Snap to zero when very small
+                if (Math.abs(dragX) < 0.001) dragX = 0;
+                if (Math.abs(dragY) < 0.001) dragY = 0;
+
                 layers.forEach(function (el, i) {
                     var depth = parseFloat(el.dataset.depth) || 1;
-                    state[i].target = targetNorm * STRENGTH * (depth - 1);
-                    state[i].current +=
-                        (state[i].target - state[i].current) * EASE;
+                    var d = depth - 1;
+                    var tx = dragX * STRENGTH * d;
+                    var ty = dragY * STRENGTH * d;
+
+                    state[i].x += (tx - state[i].x) * 0.12;
+                    state[i].y += (ty - state[i].y) * 0.12;
+
                     el.style.transform =
-                        "translate3d(0, " +
-                        state[i].current.toFixed(2) +
+                        "translate3d(" +
+                        state[i].x.toFixed(2) +
+                        "px, " +
+                        state[i].y.toFixed(2) +
                         "px, 0)";
                 });
                 requestAnimationFrame(tick);
