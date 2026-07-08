@@ -16,5 +16,10 @@ services:
       - "traefik.http.routers.personal-website.tls.certresolver=letsencrypt"
       - "traefik.http.services.personal-website.loadbalancer.server.port=8000"
 
+networks:
+  default:
+    name: traefik
+    external: true
+
 volumes:
   app_db:
