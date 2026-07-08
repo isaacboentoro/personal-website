@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{% block title %}Blog{% endblock %}</title>
+        <style>
+            :root {
+                --bg: #eee;
+                --label-bg: #fff;
+                --text: #000;
+                --text-muted</title>: #555;
+                --border: #000;
+                --link-border: #000;
+                --pre-bg: #fff;
+                --code-bg: #eee;
+                --blockquote-border: #000;
+                --blockquote-text: #555;
+                --input-border: #000;
+                --input-bg: #fff;
+                --btn-bg: #fff;
+                --btn-border: #000;
+                --btn-hover: #eee;
+                --error: #c00;
+                --private-badge: #c00;
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    sans-serif;
+                font-weight: 400;
+                font-size: 17px;
+                line-height: 22px;
+                background: var(--bg);
+                color: var(--text);
+                min-height: 100vh;
+            }
+
+            /* Fixed header */
+            .header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                z-index: 100;
+                display: flex;
+                align-items: flex-start;
+                flex-wrap: nowrap;
+                padding: 16px 12px;
+                white-space: nowrap;
+            }
+            .header-top {
+                width: 300px;
+            }
+            .header-top > * {
+                display: inline-block;
+                background: var(--label-bg);
+            }
+            .site-title {
+                text-decoration: none;
+                color: var(--text);
+                font-weight: 200;
+                font-size: 2em;
+                line-height: 1.15;
+            }
+            .header-nav {
+                flex: 1 1 auto;
+                display: flex;
+                flex-wrap: nowrap;
+            }
+            .header-nav > * {
+                width: 10%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                position: relative;
+            }
+            .header-nav a {
+                text-decoration: none;
+                color: var(--text);
+                background: var(--label-bg);
+                display: inline-block;
+                cursor: pointer;
+            }
+            .header-nav > *:nth-child(3n + 1) {
+                top: 0;
+            }
+            .header-nav > *:nth-child(3n + 2) {
+                top: 22px;
+            }
+            .header-nav > *:nth-child(3n + 3) {
+                top: 44px;
+            }
+
+            /* Page content area */
+            .page {
+                position: fixed;
+                top: 100px;
+                left: 0;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                padding: 0 12px;
+            }
+            .container {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+                max-width: 500px;
+            }
+
+            /* Label blocks */
+            .label {
+                display: inline-block;
+                background: var(--label-bg);
+                margin-bottom: 9px;
+            }
+            .label-group {
+                margin-top: 44px;
+            }
+            .label-group .label {
+                margin-bottom: 0;
+            }
+            .label-group .label + .label {
+                margin-top: 9px;
+            }
+
+            /* Post list */
+            .post-entry {
+                margin-bottom: 22px;
+            }
+            .post-entry .label {
+                margin-bottom: 0;
+            }
+            .post-entry .label + .label {
+                margin-top: 9px;
+            }
+
+            .post-title {
+                font-weight: 200;
+                font-size: 1.3em;
+            }
+            .post-title a {
+                text-decoration: none;
+                color: var(--text);
+                border-bottom: 1px solid var(--link-border);
+                padding-bottom: 1px;
+            }
+            .post-title a:hover {
+                border-bottom-width: 2px;
+            }
+            .post-time {
+                font-size: 0.85em;
+                color: var(--text-muted);
+            }
+
+            .private-badge {
+                font-size: 0.7em;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--private-badge);
+                border: 1px solid var(--private-badge);
+                padding: 0 0.4em;
+                margin-right: 0.4em;
+            }
+
+            /* Post detail content */
+            .content .label {
+                margin-bottom: 0;
+            }
+            .content .label + .label {
+                margin-top: 9px;
+            }
+            .content h1,
+            .content h2,
+            .content h3 {
+                font-weight: 200;
+                font-size: 1.3em;
+            }
+            .content h1 {
+                font-size: 2em;
+                line-height: 1.15;
+            }
+            .content p {
+                margin: 0;
+            }
+            .content ul,
+            .content ol {
+                margin: 0;
+                padding-left: 1.5em;
+            }
+            .content li {
+                margin: 0;
+            }
+            .content blockquote {
+                border-left: 3px solid var(--blockquote-border);
+                padding-left: 1em;
+                color: var(--blockquote-text);
+                margin: 0;
+            }
+            .content code {
+                background: var(--code-bg);
+                padding: 0.1em 0.3em;
+                font-size: 0.9em;
+            }
+            .content pre {
+                background: var(--pre-bg);
+                padding: 1em;
+                overflow-x: auto;
+                font-size: 0.88em;
+                line-height: 1.5;
+                font-family:
+                    "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas,
+                    monospace;
+                margin: 0;
+            }
+            .content pre code {
+                background: none;
+                padding: 0;
+            }
+            .content img {
+                max-width: 100%;
+            }
+            .content a {
+                color: var(--text);
+                border-bottom: 1px solid var(--link-border);
+                text-decoration: none;
+                padding-bottom: 1px;
+            }
+            .content a:hover {
+                border-bottom-width: 2px;
+            }
+            .content table {
+                border-collapse: collapse;
+            }
+            .content th,
+            .content td {
+                border: 1px solid var(--border);
+                padding: 0.4em 0.8em;
+            }
+            .content hr {
+                border: none;
+                border-top: 1px solid var(--border);
+                margin: 0;
+            }
+
+            /* Back link */
+            .back-link {
+                display: inline-block;
+                background: var(--label-bg);
+                margin-top: 22px;
+                color: var(--text-muted);
+                font-size: 0.9em;
+            }
+
+            /* Code blocks with run button */
+            .code-block {
+                position: relative;
+            }
+            .run-btn {
+                position: absolute;
+                top: 0;
+                right: 0;
+                padding: 2px 8px;
+                font-size: 0.75em;
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    sans-serif;
+                background: var(--btn-bg);
+                color: var(--text-muted);
+                border: 1px solid var(--btn-border);
+                cursor: pointer;
+                z-index: 1;
+            }
+            .run-btn:hover {
+                background: var(--btn-hover);
+            }
+            .run-output {
+                background: var(--pre-bg);
+                padding: 0.5em 1em;
+                font-size: 0.85em;
+                line-height: 1.4;
+                font-family:
+                    "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas,
+                    monospace;
+                white-space: pre-wrap;
+                word-break: break-word;
+                border-top: 1px solid var(--border);
+                display: none;
+            }
+            .run-output.show {
+                display: block;
+            }
+            .run-output.error {
+                color: var(--error);
+            }
+
+            /* Pygments codehilite */
+            .highlight {
+                background: var(--pre-bg);
+            }
+            .highlight .hll {
+                background-color: #ffffcc;
+            }
+            .highlight .c {
+                color: #8f5902;
+                font-style: italic;
+            }
+            .highlight .err {
+                color: #a40000;
+                border: 1px solid #ef2929;
+            }
+            .highlight .k {
+                color: #204a87;
+                font-weight: bold;
+            }
+            .highlight .o {
+                color: #ce5c00;
+                font-weight: bold;
+            }
+            .highlight .p {
+                color: #000;
+                font-weight: bold;
+            }
+            .highlight .ch,
+            .highlight .cm,
+            .highlight .cp,
+            .highlight .cpf,
+            .highlight .c1,
+            .highlight .cs {
+                color: #8f5902;
+                font-style: italic;
+            }
+            .highlight .gd {
+                color: #a40000;
+            }
+            .highlight .ge {
+                color: #000;
+                font-style: italic;
+            }
+            .highlight .gr {
+                color: #ef2929;
+            }
+            .highlight .gh {
+                color: #000080;
+                font-weight: bold;
+            }
+            .highlight .gi {
+                color: #00a000;
+            }
+            .highlight .go {
+                color: #000;
+                font-style: italic;
+            }
+            .highlight .gp {
+                color: #8f5902;
+            }
+            .highlight .gs {
+                color: #000;
+                font-weight: bold;
+            }
+            .highlight .gu {
+                color: #800080;
+                font-weight: bold;
+            }
+            .highlight .gt {
+                color: #a40000;
+                font-weight: bold;
+            }
+            .highlight .kc,
+            .highlight .kd,
+            .highlight .kn,
+            .highlight .kp,
+            .highlight .kr,
+            .highlight .kt {
+                color: #204a87;
+                font-weight: bold;
+            }
+            .highlight .m,
+            .highlight .mb,
+            .highlight .mf,
+            .highlight .mh,
+            .highlight .mi,
+            .highlight .mo,
+            .highlight .il {
+                color: #0000cf;
+                font-weight: bold;
+            }
+            .highlight .s,
+            .highlight .sa,
+            .highlight .sb,
+            .highlight .sc,
+            .highlight .dl,
+            .highlight .s2,
+            .highlight .se,
+            .highlight .sh,
+            .highlight .si,
+            .highlight .sx,
+            .highlight .sr,
+            .highlight .s1,
+            .highlight .ss {
+                color: #4e9a06;
+            }
+            .highlight .na {
+                color: #c4a000;
+            }
+            .highlight .nb {
+                color: #204a87;
+            }
+            .highlight .nc {
+                color: #000;
+            }
+            .highlight .no {
+                color: #000;
+            }
+            .highlight .nd {
+                color: #5c35cc;
+                font-weight: bold;
+            }
+            .highlight .ni {
+                color: #ce5c00;
+            }
+            .highlight .ne {
+                color: #cc0000;
+                font-weight: bold;
+            }
+            .highlight .nf {
+                color: #000;
+            }
+            .highlight .nl {
+                color: #f57900;
+            }
+            .highlight .nn {
+                color: #000;
+            }
+            .highlight .nx {
+                color: #000;
+            }
+            .highlight .py {
+                color: #000;
+            }
+            .highlight .nt {
+                color: #204a87;
+                font-weight: bold;
+            }
+            .highlight .nv {
+                color: #000;
+            }
+            .highlight .ow {
+                color: #204a87;
+                font-weight: bold;
+            }
+            .highlight .w {
+                color: #f8f8f8;
+                text-decoration: underline;
+            }
+            .highlight .bp {
+                color: #3465a4;
+            }
+            .highlight .fm {
+                color: #000;
+            }
+            .highlight .vc {
+                color: #000;
+            }
+            .highlight .vg {
+                color: #000;
+            }
+            .highlight .vi {
+                color: #000;
+            }
+            .highlight .vm {
+                color: #000;
+            }
+
+            /* Password form */
+            .password-form label {
+                display: block;
+                font-size: 0.85em;
+                color: var(--text-muted);
+            }
+            .password-form input {
+                display: block;
+                padding: 0.4em 0.6em;
+                font-size: 1em;
+                border: 1px solid var(--input-border);
+                width: 100%;
+                max-width: 280px;
+                background: var(--input-bg);
+                color: var(--text);
+            }
+            .password-form button {
+                padding: 0.4em 1em;
+                font-size: 0.9em;
+                border: 1px solid var(--btn-border);
+                background: var(--btn-bg);
+                color: var(--text);
+                cursor: pointer;
+                margin-top: 0.5em;
+            }
+            .password-form button:hover {
+                background: var(--btn-hover);
+            }
+            .password-error {
+                color: var(--error);
+                font-size: 0.85em;
+                margin-top: 0.5em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div class="header-top">
+                <a href="{% url 'home' %}" class="site-title">isaac b.</a>
+            </div>
+            <div class="header-nav">
+                <div><a href="{% url 'post_list' %}">Blog</a></div>
+            </div>
+        </div>
+
+        <div class="page">
+            <div class="container">{% block content %}{% endblock %}</div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var blocks = document.querySelectorAll(".highlight");
+                blocks.forEach(function (block) {
+                    var wrapper = document.createElement("div");
+                    wrapper.className = "code-block";
+                    block.parentNode.insertBefore(wrapper, block);
+                    wrapper.appendChild(block);
+
+                    var btn = document.createElement("button");
+                    btn.className = "run-btn";
+                    btn.textContent = "Run";
+                    wrapper.appendChild(btn);
+
+                    var output = document.createElement("pre");
+                    output.className = "run-output";
+                    wrapper.appendChild(output);
+
+                    btn.addEventListener("click", function () {
+                        var code = block.textContent || "";
+                        output.className = "run-output";
+                        output.textContent = "Running...";
+                        output.classList.add("show");
+
+                        fetch("/blog/run/", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ code: code }),
+                        })
+                            .then(function (r) {
+                                return r.json();
+                            })
+                            .then(function (data) {
+                                output.textContent = data.output;
+                                if (!data.ok) {
+                                    output.classList.add("error");
+                                }
+                            })
+                            .catch(function () {
+                                output.textContent = "Failed to run.";
+                                output.classList.add("error");
+                            });
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

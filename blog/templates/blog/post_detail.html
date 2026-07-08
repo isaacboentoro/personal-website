@@ -1,0 +1,12 @@
+{% extends "blog/base.html" %}
+{% load markdown_extras %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="label title">{{ post.title }}</div>
+<div class="label post-time">{{ post.created_at|date:"F j, Y" }}</div>
+<div class="content label-group">{{ post.content|markdown }}</div>
+
+<a class="back-link" href="{% url 'post_list' %}">Back to all posts</a>
+{% endblock %}
